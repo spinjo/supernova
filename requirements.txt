@@ -1,0 +1,11 @@
+# convenience
+pytest==7.0.1
+black==22.3.0
+tqdm
+
+# standard science stack
+numpy==1.23.0
+scipy
+matplotlib
+
+vegas
