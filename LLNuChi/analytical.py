@@ -48,6 +48,7 @@ def J_ann_V(s, mL, mChi, Lambda, E1, E2, Fdeg):
 
 
 def J_scat_V(s, mL, mChi, Lambda, E1, E2, Fdeg):
+    """# expression has typos
     factor1 = kallen(s, mL**2, mChi**2) / (24 * np.pi * s**4 * Lambda**4)
     line1 = (
         s**4 * (3 * mChi**2 - 27 * mL**2)
@@ -83,6 +84,8 @@ def J_scat_V(s, mL, mChi, Lambda, E1, E2, Fdeg):
     )
     term2 = E2 * (line5 + line6)
     result = factor1 * Fdeg * (term1 + term2)
+    """
+    result = s**2 / (24 * np.pi * Lambda**4) * (7 * E1 + 9 * E2)  # massless limit
     return result
 
 
