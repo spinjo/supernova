@@ -9,6 +9,10 @@ SIM_FILES = {
     "SFHo-20.0": "hydro-SFHo-s20.0-MUONS-T=1.0010874.txt",
     "LS220": "hydro-LS220-T=1.0001464.txt",
 }
+RAFFELT_BOUND = {
+    "SFHo-18.6": 5.68e52,
+    "SFHo-18.80": 1.2e53,
+}  # in erg/s
 
 
 def load_simulation(name):
@@ -28,3 +32,12 @@ def load_simulation(name):
         "nu_mu": tab[:, 13],
     }
     return R, T, mu
+
+
+def get_RaffeltBound(name):
+    try:
+        bound = RAFFELT_BOUND[name]
+    except KeyError:
+        print(f"Key {name} not in dict. " f"Available keys: {RAFFELT_BOUND.keys()}")
+    bound *= c.erg2MeV * c.invs2MeV
+    return bound
