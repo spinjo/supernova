@@ -49,7 +49,7 @@ def J_ann_V(s, mL, mChi, Lambda, E1, E2, Fdeg):
 
 def J_scat_V(s, mL, mChi, Lambda, E1, E2, Fdeg):
     """# expression has typos
-    factor1 = kallen(s, mL**2, mChi**2) / (24 * np.pi * s**4 * Lambda**4)
+    factor1 = kallen(s, mL**2, mChi**2)**0.5 / (24 * np.pi * s**4 * Lambda**4)
     line1 = (
         s**4 * (3 * mChi**2 - 27 * mL**2)
         + s**3 * (-6 * mL**2 * mChi**2)
