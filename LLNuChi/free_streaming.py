@@ -22,16 +22,43 @@ class FreeStreaming_LLNuChi(FreeStreaming):
         self.alpha = 0.5
 
     def get_dQdR(self, operator, R, **kwargs):
-        dQdV_ann = self.get_dQdV_ann(operator=operator, **kwargs)
-        dQdV_scat = self.get_dQdV_scat(operator=operator, **kwargs)
+        # processes sorted by relevance
+        dQdV_ann, dQdV_scat = 0.0, 0.0
+
+        # L+ L- > nubar chibar
+        dQdV_ann += self.get_dQdV_ann(
+            operator=operator, antiparticle_finalstate=True, **kwargs
+        )
+        # L+ L- > nu chi
+        dQdV_ann += self.get_dQdV_ann(
+            operator=operator, antiparticle_finalstate=False, **kwargs
+        )
+        # L- nu > L- chi
+        dQdV_scat += self.get_dQdV_scat(
+            operator=operator, antilepton=False, antineutrino=False, **kwargs
+        )
+        # L- nubar > L- chibar
+        dQdV_scat += self.get_dQdV_scat(
+            operator=operator, antilepton=False, antineutrino=True, **kwargs
+        )
+        # L+ nu > L+ chi
+        dQdV_scat += self.get_dQdV_scat(
+            operator=operator, antilepton=True, antineutrino=False, **kwargs
+        )
+        # L+ nubar > L+ chibar
+        dQdV_scat += self.get_dQdV_scat(
+            operator=operator, antilepton=True, antineutrino=True, **kwargs
+        )
+
         dQdV = dQdV_ann + dQdV_scat
         dQdR = 4 * np.pi * R**2 * dQdV
         return dQdR
 
-    def get_dQdV_ann(self, operator, T, mu, model):
-        mu_L, mu_nuL = mu["e"], mu["nu_e"]
+    def get_dQdV_ann(self, operator, antiparticle_finalstate, T, mu, model):
+        mu_L = mu["e"]
+        mu_nu = -mu["nu_e"] if antiparticle_finalstate else mu["nu_e"]
         mL, mChi, Lambda = model["mL"], model["mChi"], model["Lambda"]
-        Fdeg_nu = get_Fdeg(0.0, T, mu_nuL, is_boson=False)
+        Fdeg_nu = get_Fdeg(0.0, T, mu_nu, is_boson=False)
 
         def get_integrand(s, E1, E2):
             J = get_J(
@@ -45,10 +72,10 @@ class FreeStreaming_LLNuChi(FreeStreaming):
                 Fdeg=Fdeg_nu,
                 Lambda=Lambda,
             )
-            get_weighting = lambda E, mass: (E**2 - mass**2) ** 0.5 / (
+            get_weighting = lambda E, mass, mu: (E**2 - mass**2) ** 0.5 / (
                 np.exp((E - mu_L) / T) + 1
             )
-            weighting = get_weighting(E1, mL) * get_weighting(E2, mL)
+            weighting = get_weighting(E1, mL, mu_L) * get_weighting(E2, mL, -mu_L)
             integrand = J * weighting
             mask1 = s > 4 * mL**2
             mask2 = s > mChi**2
@@ -73,8 +100,9 @@ class FreeStreaming_LLNuChi(FreeStreaming):
         dQdV = 1 / (32 * np.pi**4) * factor
         return dQdV
 
-    def get_dQdV_scat(self, operator, T, mu, model):
-        mu_L, mu_nuL = mu["e"], mu["nu_e"]
+    def get_dQdV_scat(self, operator, antilepton, antineutrino, T, mu, model):
+        mu_L = -mu["e"] if antilepton else mu["e"]
+        mu_nu = -mu["nu_e"] if antineutrino else mu["nu_e"]
         mL, mChi, Lambda = model["mL"], model["mChi"], model["Lambda"]
         Fdeg_L = get_Fdeg(mL, T, mu_L, is_boson=False)
 
@@ -93,7 +121,7 @@ class FreeStreaming_LLNuChi(FreeStreaming):
             get_weighting = lambda E, mass, mu: (E**2 - mass**2) ** 0.5 / (
                 np.exp((E - mu) / T) + 1
             )
-            weighting = get_weighting(EL, mL, mu_L) * get_weighting(ENu, 0.0, mu_nuL)
+            weighting = get_weighting(EL, mL, mu_L) * get_weighting(ENu, 0.0, mu_nu)
             integrand = J * weighting
             mask1 = s > mL**2
             mask2 = s > (mL + mChi) ** 2

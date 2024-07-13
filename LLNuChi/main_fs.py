@@ -1,6 +1,9 @@
 import os, sys
+import warnings
 
+warnings.filterwarnings("ignore")
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import numpy as np
 from tqdm import tqdm
 
