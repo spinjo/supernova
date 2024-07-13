@@ -40,7 +40,7 @@ def main(operator, sim_name, approach, save=True):
         pbar.set_description(f"mChi={mChi[i]:.2e}: Lambda={Lambda[i]:.2e}")
 
     results = np.stack((mChi, Lambda), axis=-1)
-    file = f"LLNuChi/results/tr_{operator}_{sim_name}.txt"
+    file = f"LLNuChi/results/tr_{approach}_{operator}_{sim_name}.txt"
     np.savetxt(file, results)
     print(f"Saved results to {file}")
 

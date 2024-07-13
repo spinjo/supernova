@@ -1,46 +1,41 @@
+import os, sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib
 
 import others.digitized_constraints as constraints
+import utils.plot_settings as ps
 
-plt.rcParams["font.family"] = "serif"
-plt.rcParams["font.serif"] = "Charter"
-plt.rcParams["text.usetex"] = True
-plt.rcParams[
-    "text.latex.preamble"
-] = r"\usepackage[bitstream-charter]{mathdesign} \usepackage{amsmath}"
-
-mChi_min = 2
-mChi_max = 900
+mChi_min = 1e0
+mChi_max = 1e3
 prec = 100
 mass = np.logspace(np.log10(mChi_min), np.log10(mChi_max), prec)
 
-y_min = 1e-55
-y_max = 1e-45
+y_min = {"V": 1e-62, "A": 1e-62, "S": 1e-62, "P": 1e-62, "T": 1e-68}
+y_max = {"V": 1e-45, "A": 1e-45, "S": 1e-45, "P": 1e-45, "T": 1e-45}
+
+FIGSIZE = (6, 5)
+LEFT, BOTTOM, RIGHT, TOP = 0.16, 0.16, 0.95, 0.95
+X_LABEL_POS, Y_LABEL_POS = -0.08, -0.12
 
 
-def get_bounds():
+def get_bounds(operator):
     bounds = {}
-    for operator in ["s", "p", "v", "a", "t"]:
-        x, y = constraints.get_bound_overproduction(operator)
-        bounds[f"overproduction_{operator}"] = {"x": x, "y": y}
-    for operator in ["s", "p", "t", "a"]:
-        x, y = constraints.get_bound_nugamma(operator)
-        bounds[f"nugamma_{operator}"] = {"x": x, "y": y}
-    for operator in ["v", "a"]:
-        x, y = constraints.get_bound_pandax(operator)
-        bounds[f"pandax_{operator}"] = {"x": x, "y": y}
-    x, y = constraints.get_bound_straight(mass, "v_nu3gamma")
-    bounds[f"nugamma_v"] = {"x": x, "y": y}
-    for operator in ["v", "a"]:
-        x, y = constraints.get_bound_straight(mass, f"{operator}_3nu")
-        bounds[f"3nu_{operator}"] = {"x": x, "y": y}
+    x, y, label = constraints.get_bound_overproduction(operator)
+    bounds[label] = {"x": x, "y": y}
+    x, y, label = constraints.get_bound_nugamma(mass, operator)
+    bounds[label] = {"x": x, "y": y}
+    x, y, label = constraints.get_bound_nudecay(mass, operator)
+    bounds[label] = {"x": x, "y": y}
+    x, y, label = constraints.get_bound_pandax(operator)
+    bounds[label] = {"x": x, "y": y}
     return bounds
 
 
-def get_sigmav(mass, Lambda):
+def get_sigmav(Lambda):
     # see https://arxiv.org/pdf/2206.02339 below eqn4
     sigma_e = mass**2 / (4 * np.pi * Lambda**4)
     # see https://arxiv.org/pdf/2201.11497 above eqn 2a
@@ -52,48 +47,80 @@ def get_sigmav(mass, Lambda):
     return sigma_e * v * unit_conversion
 
 
-def get_SN_bounds():
-    bounds = {}
+def get_SN_bounds(operator, tr_approach):
     # free-streaming
-    for operator in ["V"]:
-        data = np.loadtxt(f"results/fs_V_SFHo-18.80.txt")
-        Lambda = data[0, 1]
-        bounds[operator] = {
-            "x": mass,
-            "y_low": get_sigmav(mass, Lambda),
-            "y_high": get_sigmav(mass, Lambda / 100),
-        }
+    data_fs = np.loadtxt(f"results/fs_{operator}_SFHo-18.80.txt")
+    Lambda_fs = data_fs[0, 1]
+    data_tr = np.loadtxt(f"results/tr_{tr_approach}_{operator}_SFHo-18.80.txt")
+    Lambda_tr = data_tr[0, 1]
+    bounds = {
+        "x": mass,
+        "y_low": get_sigmav(Lambda_fs),
+        "y_high": get_sigmav(Lambda_tr),
+        "Lambda_fs": Lambda_fs,
+        "Lambda_tr": Lambda_tr,
+    }
     return bounds
 
 
-def money_plot():
-    # only V for now
+def money_plot(tr_approach):
+    filename = f"results/moneyplot_1_{tr_approach}.pdf"
+    with PdfPages(filename) as file:
+        for operator in ["V", "A", "S", "P", "T"]:
+            bounds_others = get_bounds(operator)
+            bounds_SN = get_SN_bounds(operator, tr_approach)
 
-    bounds = get_bounds()
-    bounds_SN = get_SN_bounds()
+            fig, ax = plt.subplots(1, 1, figsize=FIGSIZE)
 
-    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+            # axes
+            ax.set_xscale("log")
+            ax.set_yscale("log")
+            ax.set_xlim(mChi_min, mChi_max)
+            ax.set_ylim(y_min[operator], y_max[operator])
+            ax.set_xlabel(r"$m_\chi$ [keV]")
+            ax.set_ylabel(r"$\sigma_{\chi e} v_\chi$ [cm$^2$]")
 
-    # axes
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ax.set_xlim(mChi_min, mChi_max)
-    ax.set_ylim(y_min, y_max)
-    ax.set_xlabel(r"$m_\chi$ [keV]")
-    ax.set_ylabel(r"$\sigma_{\chi e} v_\chi$ [cm$^2$]")
+            # SN bound
+            x, y_low, y_high = [bounds_SN[key] for key in ["x", "y_low", "y_high"]]
+            ax.fill_between(
+                x,
+                y_low,
+                y_high,
+                alpha=0.5,
+                color=ps.colors[0],
+                label="SN",
+            )
 
-    # contents
-    unpack = lambda string: [bounds[string][key] for key in ["x", "y"]]
-    for string in ["pandax", "overproduction", "nugamma", "3nu"]:
-        x, y = unpack(f"{string}_v")
-        ax.fill_between(x, y, y_max * np.ones_like(x), alpha=0.5, label=string)
-    x, y_low, y_high = [bounds_SN["V"][key] for key in ["x", "y_low", "y_high"]]
-    ax.fill_between(x, y_low, y_high, alpha=0.5, label="SN")
+            # other bounds
+            unpack = lambda string: [bounds_others[key] for key in ["x", "y"]]
+            for (label, value), color in zip(bounds_others.items(), ps.colors[1:]):
+                x, y = [bounds_others[label][key] for key in ["x", "y"]]
+                if x is None or y is None:
+                    continue
+                ax.fill_between(
+                    x,
+                    y,
+                    y_max[operator] * np.ones_like(x),
+                    alpha=0.5,
+                    color=color,
+                    label=label,
+                )
 
-    ax.legend(loc=4, frameon=False)
-    ax.set_title("Constraints on V interactions")
-    plt.savefig("results/moneyplot_1.pdf", bbox_inches="tight")
-    plt.close()
+            ax.text(
+                0.95,
+                0.95,
+                s=r"${%s}$" % operator,
+                horizontalalignment="right",
+                verticalalignment="top",
+                transform=ax.transAxes,
+                fontsize=2 * ps.FONTSIZE,
+            )
+            ax.legend(loc=3, frameon=False)
+            ax.xaxis.set_label_coords(0.5, X_LABEL_POS)
+            ax.yaxis.set_label_coords(Y_LABEL_POS, 0.5)
+            plt.subplots_adjust(LEFT, BOTTOM, RIGHT, TOP)
+            plt.savefig(file, bbox_inches="tight", format="pdf")
+            plt.close()
 
 
-money_plot()
+money_plot(tr_approach="inverse")
