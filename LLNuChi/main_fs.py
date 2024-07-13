@@ -7,15 +7,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import numpy as np
 from tqdm import tqdm
 
-# do free-streaming and trapping both in this file?
 import utils.constants as c
 from utils.simulation_loader import load_simulation, get_RaffeltBound
-from LLNuChi.free_streaming import FreeStreaming_LLNuChi
+from LLNuChi.free_streaming import FreeStreamer_LLNuChi
 
 
 def main(operator, sim_name, save=True):
     print(
-        f"### Starting calculation for " f"operator={operator}, sim_name={sim_name} ###"
+        f"### Free-streaming calculation for "
+        f"operator={operator}, sim_name={sim_name} ###"
     )
     R, T, mu = load_simulation(sim_name)
     sim_range = [50, 80]
@@ -26,7 +26,7 @@ def main(operator, sim_name, save=True):
     mChi = np.logspace(np.log10(mChi_min), np.log10(mChi_max), n_mChi)
 
     Lambda = np.zeros_like(mChi)
-    freestreamer = FreeStreaming_LLNuChi()
+    freestreamer = FreeStreamer_LLNuChi()
     for i in (pbar := tqdm(range(n_mChi), desc="")):
         model = {"mL": c.me, "mChi": mChi[i], "Lambda": 1.0}
         Q = freestreamer.get_Q(operator, sim_range, R, T, mu, model=model)
@@ -45,8 +45,9 @@ def get_Lambda(Q, sim_name):
     return Lambda
 
 
-main("V", "SFHo-18.80")
-main("A", "SFHo-18.80")
-main("S", "SFHo-18.80")
-main("P", "SFHo-18.80")
-main("T", "SFHo-18.80")
+save = False
+main("V", "SFHo-18.80", save=save)
+main("A", "SFHo-18.80", save=save)
+main("S", "SFHo-18.80", save=save)
+main("P", "SFHo-18.80", save=save)
+main("T", "SFHo-18.80", save=save)

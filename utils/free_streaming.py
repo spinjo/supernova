@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class FreeStreaming:
+class FreeStreamer:
     def __init__(self):
         # TODO: LOGGER
         self.nitn = 10

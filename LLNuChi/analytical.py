@@ -39,7 +39,7 @@ def sigma_scat(operator, s, mL, mChi, Lambda):
             - s * (mChi**4 - 6 * mL**4 + 3 * mL**2 * mChi**2)
             - 2 * mL**2 * (mL**2 - mChi**2) ** 2
         )
-    if operator == "A":
+    elif operator == "A":
         factor2 = 1 / (24 * np.pi * Lambda**4 * s**3)
         factor3 = (
             8 * s**3
@@ -47,7 +47,7 @@ def sigma_scat(operator, s, mL, mChi, Lambda):
             - s * (mChi**4 + 6 * mL**4 - 9 * mL**2 * mChi**2)
             - 2 * mL**2 * (mL**2 - mChi**2) ** 2
         )
-    if operator == "S":
+    elif operator == "S":
         factor2 = 1 / (48 * np.pi * Lambda**4 * s**3)
         factor3 = (
             2 * s**3
@@ -55,7 +55,7 @@ def sigma_scat(operator, s, mL, mChi, Lambda):
             - s * (6 * mL**4 + mChi**4 - 9 * mChi**2 * mL**2)
             - 2 * mL**2 * (mL**2 - mChi**2) ** 2
         )
-    if operator == "P":
+    elif operator == "P":
         factor2 = 1 / (48 * np.pi * Lambda**4 * s**3)
         factor3 = (
             2 * s**3
@@ -63,7 +63,7 @@ def sigma_scat(operator, s, mL, mChi, Lambda):
             - s * (mChi**4 - 6 * mL**4 + 3 * mL**2 * mChi**2)
             - 2 * mL**2 * (mL**2 - mChi**2) ** 2
         )
-    if operator == "T":
+    elif operator == "T":
         factor2 = 1 / (6 * np.pi * Lambda**4 * s**3)
         factor3 = (
             14 * s**3

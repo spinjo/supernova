@@ -18,4 +18,4 @@ MeV2invfm = 5.1e-3
 invcmtoMeV = 1 / 5.1e10
 
 # supernova-specific constants
-twoThirds = 2 / 3  # in case you dont trust astrophysics
+two_thirds = 2 / 3  # in case you dont trust astrophysics

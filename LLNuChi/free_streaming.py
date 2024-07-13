@@ -3,50 +3,37 @@ import vegas
 
 from utils.kinematics import get_s
 from utils.thermodynamics import get_Fdeg
-from utils.free_streaming import FreeStreaming
+from utils.free_streaming import FreeStreamer
 from LLNuChi.analytical import get_J
 
-"""
-TODO
-- Also integrate over R within this class?
-- Could parallelize over simulation points...
-"""
 
-
-class FreeStreaming_LLNuChi(FreeStreaming):
-    def __init__(self):
-        # vegas parameters
-        # verbose / logger
-        self.nitn = 10
-        self.neval = 1000
-        self.alpha = 0.5
-
+class FreeStreamer_LLNuChi(FreeStreamer):
     def get_dQdR(self, operator, R, **kwargs):
         # processes sorted by relevance
         dQdV_ann, dQdV_scat = 0.0, 0.0
 
         # L+ L- > nubar chibar
-        dQdV_ann += self.get_dQdV_ann(
+        dQdV_ann += self._get_dQdV_ann(
             operator=operator, antiparticle_finalstate=True, **kwargs
         )
         # L+ L- > nu chi
-        dQdV_ann += self.get_dQdV_ann(
+        dQdV_ann += self._get_dQdV_ann(
             operator=operator, antiparticle_finalstate=False, **kwargs
         )
         # L- nu > L- chi
-        dQdV_scat += self.get_dQdV_scat(
+        dQdV_scat += self._get_dQdV_scat(
             operator=operator, antilepton=False, antineutrino=False, **kwargs
         )
         # L- nubar > L- chibar
-        dQdV_scat += self.get_dQdV_scat(
+        dQdV_scat += self._get_dQdV_scat(
             operator=operator, antilepton=False, antineutrino=True, **kwargs
         )
         # L+ nu > L+ chi
-        dQdV_scat += self.get_dQdV_scat(
+        dQdV_scat += self._get_dQdV_scat(
             operator=operator, antilepton=True, antineutrino=False, **kwargs
         )
         # L+ nubar > L+ chibar
-        dQdV_scat += self.get_dQdV_scat(
+        dQdV_scat += self._get_dQdV_scat(
             operator=operator, antilepton=True, antineutrino=True, **kwargs
         )
 
@@ -54,7 +41,7 @@ class FreeStreaming_LLNuChi(FreeStreaming):
         dQdR = 4 * np.pi * R**2 * dQdV
         return dQdR
 
-    def get_dQdV_ann(self, operator, antiparticle_finalstate, T, mu, model):
+    def _get_dQdV_ann(self, operator, antiparticle_finalstate, T, mu, model):
         mu_L = mu["e"]
         mu_nu = -mu["nu_e"] if antiparticle_finalstate else mu["nu_e"]
         mL, mChi, Lambda = model["mL"], model["mChi"], model["Lambda"]
@@ -100,7 +87,7 @@ class FreeStreaming_LLNuChi(FreeStreaming):
         dQdV = 1 / (32 * np.pi**4) * factor
         return dQdV
 
-    def get_dQdV_scat(self, operator, antilepton, antineutrino, T, mu, model):
+    def _get_dQdV_scat(self, operator, antilepton, antineutrino, T, mu, model):
         mu_L = -mu["e"] if antilepton else mu["e"]
         mu_nu = -mu["nu_e"] if antineutrino else mu["nu_e"]
         mL, mChi, Lambda = model["mL"], model["mChi"], model["Lambda"]
