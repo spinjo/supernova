@@ -43,3 +43,7 @@ def get_Lambda(Q, sim_name):
 
 
 main("V", "SFHo-18.80")
+main("A", "SFHo-18.80")
+main("S", "SFHo-18.80")
+main("P", "SFHo-18.80")
+main("T", "SFHo-18.80")
