@@ -6,7 +6,9 @@ colors = ["#F56C0F", "#BC1D61", "#088C95", "#B4C948", "#75E8DA"]
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["font.serif"] = "Charter"
 plt.rcParams["text.usetex"] = True
-plt.rcParams['text.latex.preamble'] = r'\usepackage[bitstream-charter]{mathdesign} \usepackage{amsmath}'
+plt.rcParams[
+    "text.latex.preamble"
+] = r"\usepackage[bitstream-charter]{mathdesign} \usepackage{amsmath}"
 
 FONTSIZE = 13  # pt
 PAGEWIDTH = 11  # inches
