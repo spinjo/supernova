@@ -124,3 +124,4 @@ def money_plot(tr_approach):
 
 
 money_plot(tr_approach="inverse")
+money_plot(tr_approach="exact")

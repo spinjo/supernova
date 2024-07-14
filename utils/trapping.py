@@ -6,10 +6,7 @@ from utils.supernova import get_trapping_sphere_radius
 
 class Trapper:
     def __init__(self, mfp_prescription="thermal", approach="exact"):
-        # TODO: LOGGER
-        self.nitn = 10
-        self.neval = 1000
-        self.alpha = 0.5
+        self.vegas_kwargs = {"nitn": 10, "neval": 1000, "alpha": 0.5}
         assert mfp_prescription in ["Rosseland", "thermal"]
         self.mfp_prescription = mfp_prescription
         assert approach in ["inverse", "exact"]

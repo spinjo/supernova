@@ -40,9 +40,10 @@ def main(operator, sim_name, approach, save=True):
         pbar.set_description(f"mChi={mChi[i]:.2e}: Lambda={Lambda[i]:.2e}")
 
     results = np.stack((mChi, Lambda), axis=-1)
-    file = f"LLNuChi/results/tr_{approach}_{operator}_{sim_name}.txt"
-    np.savetxt(file, results)
-    print(f"Saved results to {file}")
+    if save:
+        file = f"LLNuChi/results/tr_{approach}_{operator}_{sim_name}.txt"
+        np.savetxt(file, results)
+        print(f"Saved results to {file}")
 
 
 def get_Lambda(opacity):
@@ -51,7 +52,7 @@ def get_Lambda(opacity):
 
 
 save = True
-approach = "inverse"
+approach = "exact"
 main("V", "SFHo-18.80", approach, save=save)
 main("A", "SFHo-18.80", approach, save=save)
 main("S", "SFHo-18.80", approach, save=save)

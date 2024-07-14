@@ -83,7 +83,7 @@ class FreeStreamer_LLNuChi(FreeStreamer):
         integrator = vegas.Integrator(
             [[mL / (T + mL), 1.0], [mL / (T + mL), 1.0], [-1.0, 1.0]]
         )
-        factor = integrator(f, nitn=self.nitn, neval=self.neval, alpha=self.alpha).mean
+        factor = integrator(f, **self.vegas_kwargs).mean
         dQdV = 1 / (32 * np.pi**4) * factor
         return dQdV
 
@@ -129,6 +129,6 @@ class FreeStreamer_LLNuChi(FreeStreamer):
         integrator = vegas.Integrator(
             [[mL / (T + mL), 1.0], [mL / (T + mL), 1.0], [-1.0, 1.0]]
         )
-        factor = integrator(f, nitn=self.nitn, neval=self.neval, alpha=self.alpha).mean
+        factor = integrator(f, **self.vegas_kwargs).mean
         dQdV = 1 / (32 * np.pi**4) * factor
         return dQdV

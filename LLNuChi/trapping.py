@@ -81,7 +81,7 @@ class Trapper_LLNuChi(Trapper):
         integrator = vegas.Integrator(
             [[mChi / (T + mChi), 1.0], [0.0, 1.0], [-1.0, 1.0]]
         )
-        factor = integrator(f, nitn=self.nitn, neval=self.neval, alpha=self.alpha).mean
+        factor = integrator(f, **self.vegas_kwargs).mean
         norm = self.mean_free_path_normalization(mChi, T)
         return factor / norm
 
@@ -109,15 +109,16 @@ class Trapper_LLNuChi(Trapper):
         integrator = vegas.Integrator(
             [[mChi / (T + mChi), 1.0], [mL / (T + mL), 1.0], [-1.0, 1.0]]
         )
-        factor = integrator(f, nitn=self.nitn, neval=self.neval, alpha=self.alpha).mean
+        factor = integrator(f, **self.vegas_kwargs).mean
         norm = self.mean_free_path_normalization(mChi, T)
         return factor / norm
 
-    def get_imfp_exact(self, operator, T, mu, model, nsteps=100):
+    def get_imfp_exact(self, operator, T, mu, model, nsteps=20):
         mChi = model["mChi"]
+        x_min = mChi / T * (1 + 1e-5)
+        Echi = np.exp(np.linspace(np.log(x_min * T), np.log(X_MAX * T), nsteps))
 
-        x_min = mChi / T * (1 + 1e-2)
-        Echi = np.logspace(np.log(x_min), np.log(X_MAX), nsteps) * T
+        # evaluate Gamma on a grid
         Gamma = np.zeros(nsteps)
         for i in range(nsteps):
             Gamma[i] += self._get_gamma_ann(
@@ -129,39 +130,30 @@ class Trapper_LLNuChi(Trapper):
             Gamma[i] += self._get_gamma_scat(
                 operator, antilepton=True, Echi=Echi[i], T=T, mu=mu, model=model
             )
-        assert np.isfinite(Gamma).all()
 
-        # Gamma = 0. for small Echi?
-        print(Gamma)
+        # interpolate over the grid and evaluate the mfp
         Gamma = np.clip(Gamma, a_min=GAMMA_MIN, a_max=None)
-        print(Gamma)
-        print("1/gamma", 1 / Gamma)
-        mfp = (1 - mChi**2 / Echi**2) ** 0.5 / Gamma
-        weighting = self.mean_free_path_weight(Echi, mChi, T, is_boson=False)
-        print("weight", weighting)
-        integrand_grid = mfp * weighting
-        print("grid", integrand_grid)
-        integrand_interpolation = interp1d(
-            np.log(Echi / T), np.log(integrand_grid), kind="linear"
+        logGamma_interpolation = interp1d(
+            np.log(Echi / T),
+            np.log(Gamma),
+            kind="linear",
+            fill_value="extrapolate",
         )
-        # assert np.isfinite(mfp).all()
 
-        import matplotlib.pyplot as plt
+        def f(x):
+            Echi = x * T
+            Gamma = np.exp(logGamma_interpolation(np.log(x)))
+            mfp = (1 - mChi**2 / Echi**2) ** 0.5 / Gamma
+            weighting = self.mean_free_path_weight(Echi, mChi, T, is_boson=False)
+            integrand = mfp * weighting
+            return integrand
 
-        plt.xscale("log")
-        plt.yscale("log")
-        plt.plot(Echi, weighting, label="weight")
-        # plt.plot(Echi, mfp, label="mfp")
-        plt.legend()
-        plt.show()
+        factor = quad(f, x_min, X_MAX)[0]
 
-        factor = quad(
-            lambda x: np.exp(integrand_interpolation(np.log(x))), x_min, X_MAX
-        )[0]
         norm = self.mean_free_path_normalization(mChi, T)
         mfp = factor / norm
         imfp = 1 / mfp
-        print(mfp, imfp)
+        assert np.isfinite(imfp).all()
         return imfp
 
     def _get_gamma_ann(self, operator, Echi, T, mu, model):
@@ -170,31 +162,20 @@ class Trapper_LLNuChi(Trapper):
         Fdeg_Lm = get_Fdeg(mL, T, mu_L, is_boson=False)
         Fdeg_Lp = get_Fdeg(mL, T, -mu_L, is_boson=False)
 
-        def get_integrand(s, Enu):
-            sigma = get_sigma(
-                "annihilation", operator, s=s, mL=mL, mChi=mChi, Lambda=Lambda
-            )
-            factor1 = 1 / (4 * np.pi * Echi) * (s - mChi**2)
-            factor2 = Enu / (np.exp((Enu - mu_nuL) / T) + 1)
-            integrand = Fdeg_Lm * Fdeg_Lp * factor1 * factor2 * sigma
-            mask1 = s > 4 * mL**2
-            mask2 = s > mChi**2
-            mask = np.logical_and(mask1, mask2)
-            integrand[~mask] = 0.0
-            return integrand
-
         @vegas.batchintegrand
         def f(x):
             a, costh = x[..., 0], x[..., 1]
             Enu = T * a / (1 - a)
             jac = T / (1 - a) ** 2
             s = get_s(mChi, 0.0, Echi, Enu, costh)
-            integrand = get_integrand(s, Enu)
-            assert np.isfinite(integrand).all()
-            return integrand
+            gamma = self._get_gamma_diff_ann(
+                operator, s, Echi, Enu, mL, mChi, Lambda, T, mu_nuL, Fdeg_Lm, Fdeg_Lp
+            )
+            assert np.isfinite(gamma).all()
+            return gamma
 
         integrator = vegas.Integrator([[0.0, 1.0], [-1.0, 1.0]])
-        Gamma = integrator(f, nitn=self.nitn, neval=self.neval, alpha=self.alpha).mean
+        Gamma = integrator(f, **self.vegas_kwargs).mean
         return Gamma
 
     def _get_gamma_scat(self, operator, antilepton, Echi, T, mu, model):
@@ -203,33 +184,18 @@ class Trapper_LLNuChi(Trapper):
         Fdeg_L = get_Fdeg(mL, T, mu_L, is_boson=False)
         Fdeg_nu = get_Fdeg(0.0, T, mu_nuL, is_boson=False)
 
-        def get_integrand(s, EL):
-            sigma = get_sigma(
-                "scattering", operator, s=s, mL=mL, mChi=mChi, Lambda=Lambda
-            )
-            factor1 = (
-                1
-                / (4 * np.pi * Echi)
-                * ((s - mL**2 - mChi**2) ** 2 - (2 * mL**2 * mChi**2)) ** 0.5
-            )
-            factor2 = (EL**2 - mL**2) ** 0.5 / (np.exp((EL - mu_L) / T) + 1)
-            integrand = Fdeg_L * Fdeg_nu * factor1 * factor2 * sigma
-            mask1 = s > (mL + mChi) ** 2
-            mask2 = s > mL**2
-            mask = np.logical_and(mask1, mask2)
-            integrand[~mask] = 0.0
-            return integrand
-
         @vegas.batchintegrand
         def f(x):
             a, costh = x[..., 0], x[..., 1]
             EL = T * a / (1 - a)
             jac = T / (1 - a) ** 2
             s = get_s(mChi, mL, Echi, EL, costh)
-            integrand = get_integrand(s, EL)
-            assert np.isfinite(integrand).all()
-            return integrand
+            gamma = self._get_gamma_diff_scat(
+                operator, s, Echi, EL, mL, mChi, Lambda, T, mu_L, Fdeg_L, Fdeg_nu
+            )
+            assert np.isfinite(gamma).all()
+            return gamma
 
         integrator = vegas.Integrator([[mL / (T + mL), 1.0], [-1.0, 1.0]])
-        Gamma = integrator(f, nitn=self.nitn, neval=self.neval, alpha=self.alpha).mean
+        Gamma = integrator(f, **self.vegas_kwargs).mean
         return Gamma

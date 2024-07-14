@@ -3,10 +3,7 @@ import numpy as np
 
 class FreeStreamer:
     def __init__(self):
-        # TODO: LOGGER
-        self.nitn = 10
-        self.neval = 1000
-        self.alpha = 0.5
+        self.vegas_kwargs = {"nitn": 10, "neval": 1000, "alpha": 0.5}
 
     def get_Q(self, operator, sim_range, R, T, mu, **kwargs):
         n1, n2 = sim_range

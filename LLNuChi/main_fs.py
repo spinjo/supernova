@@ -34,9 +34,10 @@ def main(operator, sim_name, save=True):
         pbar.set_description(f"mChi={mChi[i]:.2e}: Lambda={Lambda[i]:.2e}")
 
     results = np.stack((mChi, Lambda), axis=-1)
-    file = f"LLNuChi/results/fs_{operator}_{sim_name}.txt"
-    np.savetxt(file, results)
-    print(f"Saved results to {file}")
+    if save:
+        file = f"LLNuChi/results/fs_{operator}_{sim_name}.txt"
+        np.savetxt(file, results)
+        print(f"Saved results to {file}")
 
 
 def get_Lambda(Q, sim_name):
@@ -45,7 +46,7 @@ def get_Lambda(Q, sim_name):
     return Lambda
 
 
-save = False
+save = True
 main("V", "SFHo-18.80", save=save)
 main("A", "SFHo-18.80", save=save)
 main("S", "SFHo-18.80", save=save)
