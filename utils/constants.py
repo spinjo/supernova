@@ -1,6 +1,4 @@
-# fundamental constants
-e = 1.6e-19
-c = 3e8
+import math
 
 # masses (all in MeV)
 me = 0.51099895000
@@ -8,7 +6,10 @@ mmu = 105.6583755
 mtau = 1776.86
 mp = 938.272088
 mn = 939.565420
+
+# couplings
 alphaEM = 1 / 137.035999084
+e = (4 * math.pi * alphaEM) ** 0.5
 
 # transforming units
 erg2MeV = 6.2415e5
