@@ -103,13 +103,13 @@ def J_ann(operator, s, mL, mChi, Lambda, E1, E2, Fdeg):
             * (2 * mL**2 * (mChi**2 - 4 * s) + s * (mChi**2 + 2 * s))
         )
     elif operator == "S":
-        factor1 = (E1 + E2) / (8 * np.pi * s**3 * Lambda**4)
+        factor1 = (E1 + E2) / (8 * np.pi * s**2 * Lambda**4)
         factor2 = (s - mChi**2) ** 2 * (s + mChi**2) * (s - 4 * mL**2)
     elif operator == "P":
-        factor1 = (E1 + E2) / (12 * np.pi * s**3 * Lambda**4)
+        factor1 = (E1 + E2) / (12 * np.pi * s * Lambda**4)
         factor2 = (s - mChi**2) ** 2 * (s + mChi**2)
     elif operator == "T":
-        factor1 = (E1 + E2) / (12 * np.pi * s**3 * Lambda**4)
+        factor1 = (E1 + E2) / (3 * np.pi * s**3 * Lambda**4)
         factor2 = (
             (s - mChi**2) ** 2
             * (s + mChi**2)
