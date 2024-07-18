@@ -21,6 +21,9 @@ FIGSIZE = (6, 5)
 LEFT, BOTTOM, RIGHT, TOP = 0.16, 0.16, 0.95, 0.95
 X_LABEL_POS, Y_LABEL_POS = -0.08, -0.12
 
+sim1, sim2 = "SFHo-18.80", "SFHo-20.0"
+sim2_linestyle = (0, (1, 1))
+
 
 def get_bounds(operator):
     bounds = {}
@@ -48,18 +51,19 @@ def get_sigmav(Lambda):
 
 
 def get_SN_bounds(operator, tr_approach):
-    # free-streaming
-    data_fs = np.loadtxt(f"results/fs_{operator}_SFHo-18.80.txt")
-    Lambda_fs = data_fs[0, 1]
-    data_tr = np.loadtxt(f"results/tr_{tr_approach}_{operator}_SFHo-18.80.txt")
-    Lambda_tr = data_tr[0, 1]
-    bounds = {
-        "x": mass,
-        "y_low": get_sigmav(Lambda_fs),
-        "y_high": get_sigmav(Lambda_tr),
-        "Lambda_fs": Lambda_fs,
-        "Lambda_tr": Lambda_tr,
-    }
+    bounds = {}
+    for sim_name in ["SFHo-18.80", "SFHo-20.0"]:
+        data_fs = np.loadtxt(f"results/fs_{operator}_{sim_name}.txt")
+        Lambda_fs = data_fs[0, 1]
+        data_tr = np.loadtxt(f"results/tr_{tr_approach}_{operator}_{sim_name}.txt")
+        Lambda_tr = data_tr[0, 1]
+        bounds[sim_name] = {
+            "x": mass,
+            "y_low": get_sigmav(Lambda_fs),
+            "y_high": get_sigmav(Lambda_tr),
+            "Lambda_fs": Lambda_fs,
+            "Lambda_tr": Lambda_tr,
+        }
     return bounds
 
 
@@ -81,7 +85,9 @@ def money_plot(tr_approach):
             ax.set_ylabel(r"$\sigma_{\chi e} v_\chi$ [cm$^2$]")
 
             # SN bound
-            x, y_low, y_high = [bounds_SN[key] for key in ["x", "y_low", "y_high"]]
+            x, y_low, y_high = [
+                bounds_SN[sim1][key] for key in ["x", "y_low", "y_high"]
+            ]
             ax.fill_between(
                 x,
                 y_low,
@@ -90,6 +96,12 @@ def money_plot(tr_approach):
                 color=ps.colors[0],
                 label="SN",
             )
+            x, y_low, y_high = [
+                bounds_SN[sim2][key] for key in ["x", "y_low", "y_high"]
+            ]
+            kwargs = {"linestyle": sim2_linestyle, "color": ps.colors[0], "alpha": 0.5}
+            ax.plot(x, y_low, **kwargs)
+            ax.plot(x, y_high, **kwargs)
 
             # other bounds
             unpack = lambda string: [bounds_others[key] for key in ["x", "y"]]

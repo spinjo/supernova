@@ -47,8 +47,6 @@ def get_Lambda(Q, sim_name):
 
 
 save = True
-main("V", "SFHo-18.80", save=save)
-main("A", "SFHo-18.80", save=save)
-main("S", "SFHo-18.80", save=save)
-main("P", "SFHo-18.80", save=save)
-main("T", "SFHo-18.80", save=save)
+for sim_name in ["SFHo-18.80", "SFHo-20.0"]:
+    for operator in ["V", "A", "S", "P", "T"]:
+        main(operator, sim_name, save=save)

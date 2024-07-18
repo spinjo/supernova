@@ -52,9 +52,7 @@ def get_Lambda(opacity):
 
 
 save = True
-approach = "inverse"
-main("V", "SFHo-18.80", approach, save=save)
-main("A", "SFHo-18.80", approach, save=save)
-main("S", "SFHo-18.80", approach, save=save)
-main("P", "SFHo-18.80", approach, save=save)
-main("T", "SFHo-18.80", approach, save=save)
+for approach in ["inverse", "exact"]:
+    for sim_name in ["SFHo-18.80", "SFHo-20.0"]:
+        for operator in ["V", "A", "S", "P", "T"]:
+            main(operator, sim_name, approach, save=save)

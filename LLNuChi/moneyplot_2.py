@@ -11,23 +11,28 @@ import utils.plot_settings as ps
 mChi_min = 1e0
 mChi_max = 1e3
 
-Lambda_min = 1.2e-2
-Lambda_max = 3.5e1
+Lambda_min = 5e-3
+Lambda_max = 6e1
 
 FIGSIZE = (5, 3)
 LEFT, BOTTOM, RIGHT, TOP = 0.16, 0.16, 0.95, 0.95
 X_LABEL_POS, Y_LABEL_POS = -0.1, -0.11
 
+sim1, sim2 = "SFHo-18.80", "SFHo-20.0"
+sim2_linestyle = (0, (1, 1))
+
 
 def get_SN_bounds(operator, tr_approach):
-    bounds = {}
-    # free-streaming
-    data = np.loadtxt(f"results/fs_{operator}_SFHo-18.80.txt")
-    mass = data[:, 0]
-    Lambda_fs = data[:, 1]
-    data = np.loadtxt(f"results/tr_{tr_approach}_{operator}_SFHo-18.80.txt")
-    assert np.all(data[:, 0] == mass)
-    Lambda_tr = data[:, 1]
+    mass, Lambda_fs, Lambda_tr = {}, {}, {}
+    for sim_name in ["SFHo-18.80", "SFHo-20.0"]:
+        data = np.loadtxt(f"results/fs_{operator}_{sim_name}.txt")
+        mass[sim_name] = data[:, 0]
+        Lambda_fs[sim_name] = data[:, 1]
+        data = np.loadtxt(f"results/tr_{tr_approach}_{operator}_{sim_name}.txt")
+        assert np.all(data[:, 0] == mass[sim_name])
+        Lambda_tr[sim_name] = data[:, 1]
+        nan_mask = np.isnan(Lambda_tr[sim_name])
+        Lambda_fs[sim_name][nan_mask] = Lambda_tr[sim_name][nan_mask]
     return mass, Lambda_fs, Lambda_tr
 
 
@@ -46,7 +51,23 @@ def money_plot(tr_approach):
             ax.set_xlabel(r"$m_\chi$ [MeV]")
             ax.set_ylabel(r"$\Lambda_{{%s}}$ [TeV]" % operator)
 
-            ax.fill_between(mass, Lambda_fs, Lambda_tr, alpha=0.5, color=ps.colors[0])
+            ax.fill_between(
+                mass[sim1],
+                Lambda_fs[sim1],
+                Lambda_tr[sim1],
+                alpha=0.5,
+                color=ps.colors[0],
+            )
+            kwargs = {"linestyle": sim2_linestyle, "color": ps.colors[0], "alpha": 0.5}
+            ax.plot(mass[sim2], Lambda_fs[sim2], **kwargs)
+            ax.plot(mass[sim2], Lambda_tr[sim2], **kwargs)
+            last_idx = np.arange(len(Lambda_tr[sim2]))[np.isfinite(Lambda_tr[sim2])][-1]
+            ax.plot(
+                [mass[sim2][last_idx], mass[sim2][last_idx]],
+                [Lambda_fs[sim2][last_idx], Lambda_tr[sim2][last_idx]],
+                **kwargs,
+            )
+
             ax.xaxis.set_label_coords(0.5, X_LABEL_POS)
             ax.yaxis.set_label_coords(Y_LABEL_POS, 0.5)
             plt.subplots_adjust(LEFT, BOTTOM, RIGHT, TOP)
