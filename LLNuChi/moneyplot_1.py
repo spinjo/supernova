@@ -17,9 +17,9 @@ mass = np.logspace(np.log10(mChi_min), np.log10(mChi_max), prec)
 y_min = {"V": 1e-62, "A": 1e-62, "S": 1e-62, "P": 1e-62, "T": 1e-68}
 y_max = {"V": 1e-45, "A": 1e-45, "S": 1e-45, "P": 1e-45, "T": 1e-45}
 
-FIGSIZE = (6, 5)
+FIGSIZE = (5, 4)
 LEFT, BOTTOM, RIGHT, TOP = 0.16, 0.16, 0.95, 0.95
-X_LABEL_POS, Y_LABEL_POS = -0.08, -0.12
+X_LABEL_POS, Y_LABEL_POS = -0.08, -0.14
 
 sim1, sim2 = "SFHo-18.80", "SFHo-20.0"
 sim2_linestyle = (0, (1, 1))
@@ -94,7 +94,7 @@ def money_plot(tr_approach):
                 y_high,
                 alpha=0.5,
                 color=ps.colors[0],
-                label="SN",
+                label="SN1987A",
             )
             x, y_low, y_high = [
                 bounds_SN[sim2][key] for key in ["x", "y_low", "y_high"]
