@@ -13,11 +13,16 @@ from LLNuChi.trapping import Trapper_LLNuChi
 from utils.supernova import get_trapping_sphere_radius
 
 
-def main(operator, sim_name, approach, save=True):
+def main(operator, sim_name, approach, lepton="e", save=True):
     print(
-        f"### Trapping calculation for " f"operator={operator}, sim_name={sim_name} ###"
+        f"### Trapping calculation for "
+        f"lepton={lepton}, operator={operator}, sim_name={sim_name} ###"
     )
     R, T, mu = load_simulation(sim_name)
+    assert lepton in ["e", "mu"]
+    mu["L"] = mu[lepton]
+    mu["nu_L"] = mu[f"nu_{lepton}"]
+    mL = c.me if lepton == "e" else c.mmu
     sim_range = 10
 
     mChi_min = 1e0
@@ -28,7 +33,7 @@ def main(operator, sim_name, approach, save=True):
     Lambda = np.zeros_like(mChi)
     trapper = Trapper_LLNuChi(approach=approach)
     for i in (pbar := tqdm(range(n_mChi), desc="")):
-        model = {"mL": c.me, "mChi": mChi[i], "Lambda": 1.0}
+        model = {"mL": mL, "mChi": mChi[i], "Lambda": 1.0}
         i_crit = get_trapping_sphere_radius(mChi[i], sim_name)
         if i_crit is None:
             Lambda[i] = None
@@ -41,7 +46,7 @@ def main(operator, sim_name, approach, save=True):
 
     results = np.stack((mChi, Lambda), axis=-1)
     if save:
-        file = f"LLNuChi/results/tr_{approach}_{operator}_{sim_name}.txt"
+        file = f"LLNuChi/results/tr_{lepton}_{approach}_{operator}_{sim_name}.txt"
         np.savetxt(file, results)
         print(f"Saved results to {file}")
 

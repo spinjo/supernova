@@ -61,7 +61,7 @@ class Trapper_LLNuChi(Trapper):
         return gamma
 
     def _get_imfp_inverse_ann(self, operator, T, mu, model):
-        mu_L, mu_nuL = mu["e"], mu["nu_e"]
+        mu_L, mu_nuL = mu["L"], mu["nu_L"]
         mL, mChi, Lambda = [model[key] for key in ["mL", "mChi", "Lambda"]]
         Fdeg_Lm = get_Fdeg(mL, T, mu_L, is_boson=False)
         Fdeg_Lp = get_Fdeg(mL, T, -mu_L, is_boson=False)
@@ -89,7 +89,7 @@ class Trapper_LLNuChi(Trapper):
         return factor / norm
 
     def _get_imfp_inverse_scat(self, operator, antilepton, T, mu, model):
-        mu_L, mu_nuL = -mu["e"] if antilepton else mu["e"], mu["nu_e"]
+        mu_L, mu_nuL = -mu["L"] if antilepton else mu["L"], mu["nu_L"]
         mL, mChi, Lambda = [model[key] for key in ["mL", "mChi", "Lambda"]]
         Fdeg_L = get_Fdeg(mL, T, mu_L, is_boson=False)
         Fdeg_nu = get_Fdeg(0.0, T, mu_nuL, is_boson=False)
@@ -160,7 +160,7 @@ class Trapper_LLNuChi(Trapper):
         return imfp
 
     def _get_gamma_ann(self, operator, Echi, T, mu, model):
-        mu_L, mu_nuL = mu["e"], mu["nu_e"]
+        mu_L, mu_nuL = mu["L"], mu["nu_L"]
         mL, mChi, Lambda = [model[key] for key in ["mL", "mChi", "Lambda"]]
         Fdeg_Lm = get_Fdeg(mL, T, mu_L, is_boson=False)
         Fdeg_Lp = get_Fdeg(mL, T, -mu_L, is_boson=False)
@@ -182,7 +182,7 @@ class Trapper_LLNuChi(Trapper):
         return Gamma
 
     def _get_gamma_scat(self, operator, antilepton, Echi, T, mu, model):
-        mu_L, mu_nuL = -mu["e"] if antilepton else mu["e"], mu["nu_e"]
+        mu_L, mu_nuL = -mu["L"] if antilepton else mu["L"], mu["nu_L"]
         mL, mChi, Lambda = [model[key] for key in ["mL", "mChi", "Lambda"]]
         Fdeg_L = get_Fdeg(mL, T, mu_L, is_boson=False)
         Fdeg_nu = get_Fdeg(0.0, T, mu_nuL, is_boson=False)

@@ -1,7 +1,8 @@
 import numpy as np
 from scipy.integrate import quad
 
-from utils.supernova import get_trapping_sphere_radius
+import utils.constants as c
+from utils.supernova import get_trapping_sphere_radius, get_mL_eff
 
 
 class Trapper:
@@ -12,16 +13,25 @@ class Trapper:
         assert approach in ["inverse", "exact"]
         self.approach = approach
 
-    def get_opacity(self, operator, i_crit, sim_range, R, T, mu, **kwargs):
+    def get_opacity(self, operator, i_crit, sim_range, R, T, mu, model, **kwargs):
         n = sim_range
         imfp = np.zeros(n)
+        mL = model["mL"]
         for i in range(n):
+            if mL == c.me:
+                # use electron effective mass
+                model["mL"] = get_mL_eff(mL, T[i_crit + i], mu["L"][i_crit + i])
             mu_i = {
                 particle: mu_particle[i_crit + i]
                 for particle, mu_particle in mu.items()
             }
             imfp[i] = self.get_inverse_mean_free_path(
-                operator, R=R[i_crit + i], T=T[i_crit + i], mu=mu_i, **kwargs
+                operator,
+                R=R[i_crit + i],
+                T=T[i_crit + i],
+                mu=mu_i,
+                model=model,
+                **kwargs,
             )
         opacity = np.trapz(imfp, x=R[i_crit : i_crit + n])
         return opacity

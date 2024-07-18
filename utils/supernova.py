@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import quad
 
+import utils.constants as c
 from utils.simulation_loader import load_simulation, get_RaffeltBound
 
 
@@ -41,3 +42,12 @@ def get_trapping_sphere_radius(mChi, sim_name):
         # particle never reaches sufficient blackbody luminosity
         # because it is too heavy
         return None
+
+
+def get_mL_eff(mL, T, mu_L):
+    # following https://arxiv.org/pdf/2107.12393
+    assert mL == c.me, f"disperson relation only holds for electrons"
+    M2 = c.e**2 * (mu_L**2 + np.pi * T**2) / (8 * np.pi**2)  # eqn 8
+    mL_star = mL / 2 + (mL**2 / 4 + M2) ** 0.5  # text below eqn 8
+    mL_eff = 2**0.5 * mL_star  # eqn 7 (also text between eqn 8 and eqn 9)
+    return mL_eff

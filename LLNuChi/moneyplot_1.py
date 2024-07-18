@@ -50,12 +50,15 @@ def get_sigmav(Lambda):
     return sigma_e * v * unit_conversion
 
 
-def get_SN_bounds(operator, tr_approach):
+def get_SN_bounds(operator, tr_approach, lepton="e"):
+    assert lepton == "e"
     bounds = {}
     for sim_name in ["SFHo-18.80", "SFHo-20.0"]:
-        data_fs = np.loadtxt(f"results/fs_{operator}_{sim_name}.txt")
+        data_fs = np.loadtxt(f"results/fs_{lepton}_{operator}_{sim_name}.txt")
         Lambda_fs = data_fs[0, 1]
-        data_tr = np.loadtxt(f"results/tr_{tr_approach}_{operator}_{sim_name}.txt")
+        data_tr = np.loadtxt(
+            f"results/tr_{lepton}_{tr_approach}_{operator}_{sim_name}.txt"
+        )
         Lambda_tr = data_tr[0, 1]
         bounds[sim_name] = {
             "x": mass,

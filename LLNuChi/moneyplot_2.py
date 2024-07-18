@@ -11,8 +11,8 @@ import utils.plot_settings as ps
 mChi_min = 1e0
 mChi_max = 1e3
 
-Lambda_min = 5e-3
-Lambda_max = 6e1
+Lambda_min = {"e": 5e-3, "mu": 2e-5}
+Lambda_max = {"e": 6e1, "mu": 6e1}
 
 FIGSIZE = (5, 3)
 LEFT, BOTTOM, RIGHT, TOP = 0.16, 0.16, 0.95, 0.95
@@ -22,13 +22,15 @@ sim1, sim2 = "SFHo-18.80", "SFHo-20.0"
 sim2_linestyle = (0, (1, 1))
 
 
-def get_SN_bounds(operator, tr_approach):
+def get_SN_bounds(operator, tr_approach, lepton):
     mass, Lambda_fs, Lambda_tr = {}, {}, {}
     for sim_name in ["SFHo-18.80", "SFHo-20.0"]:
-        data = np.loadtxt(f"results/fs_{operator}_{sim_name}.txt")
+        data = np.loadtxt(f"results/fs_{lepton}_{operator}_{sim_name}.txt")
         mass[sim_name] = data[:, 0]
         Lambda_fs[sim_name] = data[:, 1]
-        data = np.loadtxt(f"results/tr_{tr_approach}_{operator}_{sim_name}.txt")
+        data = np.loadtxt(
+            f"results/tr_{lepton}_{tr_approach}_{operator}_{sim_name}.txt"
+        )
         assert np.all(data[:, 0] == mass[sim_name])
         Lambda_tr[sim_name] = data[:, 1]
         nan_mask = np.isnan(Lambda_tr[sim_name])
@@ -36,18 +38,20 @@ def get_SN_bounds(operator, tr_approach):
     return mass, Lambda_fs, Lambda_tr
 
 
-def money_plot(tr_approach):
-    filename = f"results/moneyplot_2_{tr_approach}.pdf"
+def money_plot(tr_approach, lepton):
+    filename = f"results/moneyplot_2_{lepton}_{tr_approach}.pdf"
     with PdfPages(filename) as file:
         for operator in ["V", "A", "S", "P", "T"]:
-            mass, Lambda_fs, Lambda_tr = get_SN_bounds(operator, tr_approach)
+            mass, Lambda_fs, Lambda_tr = get_SN_bounds(
+                operator, tr_approach=tr_approach, lepton=lepton
+            )
             fig, ax = plt.subplots(1, 1, figsize=FIGSIZE)
 
             # axes
             ax.set_xscale("log")
             ax.set_yscale("log")
             ax.set_xlim(mChi_min, mChi_max)
-            ax.set_ylim(Lambda_min, Lambda_max)
+            ax.set_ylim(Lambda_min[lepton], Lambda_max[lepton])
             ax.set_xlabel(r"$m_\chi$ [MeV]")
             ax.set_ylabel(r"$\Lambda_{{%s}}$ [TeV]" % operator)
 
@@ -75,5 +79,6 @@ def money_plot(tr_approach):
             plt.close()
 
 
-money_plot(tr_approach="inverse")
-money_plot(tr_approach="exact")
+for tr_approach in ["exact", "inverse"]:
+    for lepton in ["e", "mu"]:
+        money_plot(tr_approach=tr_approach, lepton=lepton)

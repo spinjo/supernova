@@ -42,8 +42,8 @@ class FreeStreamer_LLNuChi(FreeStreamer):
         return dQdR
 
     def _get_dQdV_ann(self, operator, antiparticle_finalstate, T, mu, model):
-        mu_L = mu["e"]
-        mu_nu = -mu["nu_e"] if antiparticle_finalstate else mu["nu_e"]
+        mu_L = mu["L"]
+        mu_nu = -mu["nu_L"] if antiparticle_finalstate else mu["nu_L"]
         mL, mChi, Lambda = model["mL"], model["mChi"], model["Lambda"]
         Fdeg_nu = get_Fdeg(0.0, T, mu_nu, is_boson=False)
 
@@ -88,8 +88,8 @@ class FreeStreamer_LLNuChi(FreeStreamer):
         return dQdV
 
     def _get_dQdV_scat(self, operator, antilepton, antineutrino, T, mu, model):
-        mu_L = -mu["e"] if antilepton else mu["e"]
-        mu_nu = -mu["nu_e"] if antineutrino else mu["nu_e"]
+        mu_L = -mu["L"] if antilepton else mu["L"]
+        mu_nu = -mu["nu_L"] if antineutrino else mu["nu_L"]
         mL, mChi, Lambda = model["mL"], model["mChi"], model["Lambda"]
         Fdeg_L = get_Fdeg(mL, T, mu_L, is_boson=False)
 

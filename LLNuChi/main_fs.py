@@ -12,12 +12,16 @@ from utils.simulation_loader import load_simulation, get_RaffeltBound
 from LLNuChi.free_streaming import FreeStreamer_LLNuChi
 
 
-def main(operator, sim_name, save=True):
+def main(operator, sim_name, lepton="e", save=True):
     print(
         f"### Free-streaming calculation for "
-        f"operator={operator}, sim_name={sim_name} ###"
+        f"lepton={lepton}, operator={operator}, sim_name={sim_name} ###"
     )
     R, T, mu = load_simulation(sim_name)
+    assert lepton in ["e", "mu"]
+    mu["L"] = mu[lepton]
+    mu["nu_L"] = mu[f"nu_{lepton}"]
+    mL = c.me if lepton == "e" else c.mmu
     sim_range = [50, 80]
 
     mChi_min = 1e0
@@ -28,14 +32,14 @@ def main(operator, sim_name, save=True):
     Lambda = np.zeros_like(mChi)
     freestreamer = FreeStreamer_LLNuChi()
     for i in (pbar := tqdm(range(n_mChi), desc="")):
-        model = {"mL": c.me, "mChi": mChi[i], "Lambda": 1.0}
+        model = {"mL": mL, "mChi": mChi[i], "Lambda": 1.0}
         Q = freestreamer.get_Q(operator, sim_range, R, T, mu, model=model)
         Lambda[i] = get_Lambda(Q, sim_name)
         pbar.set_description(f"mChi={mChi[i]:.2e}: Lambda={Lambda[i]:.2e}")
 
     results = np.stack((mChi, Lambda), axis=-1)
     if save:
-        file = f"LLNuChi/results/fs_{operator}_{sim_name}.txt"
+        file = f"LLNuChi/results/fs_{lepton}_{operator}_{sim_name}.txt"
         np.savetxt(file, results)
         print(f"Saved results to {file}")
 
