@@ -52,7 +52,7 @@ def get_Lambda(opacity):
 
 
 save = True
-approach = "exact"
+approach = "inverse"
 main("V", "SFHo-18.80", approach, save=save)
 main("A", "SFHo-18.80", approach, save=save)
 main("S", "SFHo-18.80", approach, save=save)
