@@ -28,10 +28,12 @@ class Trapper_LLNuChi(Trapper):
     def _get_gamma_diff_ann(
         self, operator, s, Echi, Enu, mL, mChi, Lambda, T, mu_nuL, Fdeg_Lm, Fdeg_Lp
     ):
-        sigma = get_sigma(
-            "annihilation", operator, s=s, mL=mL, mChi=mChi, Lambda=Lambda
+        # note: cross section is summed over all dof's except chi
+        sigma = (
+            get_sigma("annihilation", operator, s=s, mL=mL, mChi=mChi, Lambda=Lambda)
+            / 2
         )
-        factor1 = 1 / (4 * np.pi * Echi) * (s - mChi**2)
+        factor1 = 1 / (4 * np.pi**2 * Echi) * (s - mChi**2)
         factor2 = Enu / (np.exp((Enu - mu_nuL) / T) + 1)
         gamma = Fdeg_Lm * Fdeg_Lp * factor1 * factor2 * sigma
         mask1 = s > 4 * mL**2
@@ -43,12 +45,13 @@ class Trapper_LLNuChi(Trapper):
     def _get_gamma_diff_scat(
         self, operator, s, Echi, EL, mL, mChi, Lambda, T, mu_L, Fdeg_L, Fdeg_nu
     ):
+        # note: cross section is summed over all dof's except chi
         sigma = get_sigma("scattering", operator, s=s, mL=mL, mChi=mChi, Lambda=Lambda)
         factor1 = (
             1
-            / (4 * np.pi * Echi)
+            / (4 * np.pi**2 * Echi)
             * ((s - mL**2 - mChi**2) ** 2 - (2 * mL**2 * mChi**2)) ** 0.5
-        )
+        ) / 2
         factor2 = (EL**2 - mL**2) ** 0.5 / (np.exp((EL - mu_L) / T) + 1)
         gamma = Fdeg_L * Fdeg_nu * factor1 * factor2 * sigma
         mask1 = s > (mL + mChi) ** 2

@@ -42,8 +42,8 @@ def get_sigmav(Lambda):
     v = 1e-3
     # unit conversion
     # 1e-24 = (keV/GeV)^2 (GeV/TeV)^4 from converting everything to GeV
-    # 0.25e-26 = (5e15)^(-2) = (GeV * cm)^(-2)
-    unit_conversion = 0.25e-26 * 1e-24  # = keV^2/TeV^4/cm^2
+    # 4e-28 = 1e4 (5e15)^(-2) = 1e4 (GeV m)^(-2) = (GeV cm)^(-2)
+    unit_conversion = 4e-28 * 1e-24  # = keV^2/TeV^4/cm^2
     return sigma_e * v * unit_conversion
 
 

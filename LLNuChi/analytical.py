@@ -5,6 +5,7 @@ from utils.kinematics import kallen
 # cross sections
 # see appendix (eqnA3, eqnA5)
 def sigma_ann(operator, s, mL, mChi, Lambda):
+    # initial-state-summed cross section for L+ L- > chi nu (inverse process of what we need for trapping)
     factor1 = (1 - 4 * mL**2 / s) ** 0.5
     if operator == "V":
         factor2 = 1 / (12 * np.pi * Lambda**4 * s**2 * (s - 4 * mL**2))
@@ -26,10 +27,14 @@ def sigma_ann(operator, s, mL, mChi, Lambda):
     else:
         raise ValueError(f"operator {operator} not implemented")
     result = factor1 * factor2 * factor3
+
+    # apply correction factor to swap initial and final state
+    result *= (s - 4 * mL**2) / (s - mChi**2) ** 2
     return result
 
 
 def sigma_scat(operator, s, mL, mChi, Lambda):
+    # initial-state-summed cross section for L nu > L chi (inverse process of what we need for trapping)
     factor1 = (mL**4 - 2 * mL**2 * (s + mChi**2) + (s - mChi**2) ** 2) ** 0.5
     if operator == "V":
         factor2 = 1 / (24 * np.pi * Lambda**4 * s**3)
@@ -74,6 +79,11 @@ def sigma_scat(operator, s, mL, mChi, Lambda):
     else:
         raise ValueError(f"operator {operator} not implemented")
     result = factor1 * factor2 * factor3
+
+    # apply correction factor to swap initial and final state
+    result *= (s - m_L**2) ** 2 / (
+        s**2 - 2 * s * (mL**2 + mChi**2) + (mL**2 - mChi**2) ** 2
+    )
     return result
 
 
@@ -85,6 +95,7 @@ def get_sigma(process, operator, **kwargs):
 
 
 # J functions
+# note: J functions are summed over initial and final state
 # see section 2 (eqn 19, eqn24-28)
 def J_ann(operator, s, mL, mChi, Lambda, E1, E2, Fdeg):
     if operator == "V":

@@ -42,7 +42,7 @@ class Trapper:
             return weight1 * weight2
         elif self.mfp_prescription == "thermal":
             # E * p * f
-            weight1 = (1 - mass**2 / E**2) ** 0.5 * x
+            weight1 = (1 - mass**2 / E**2) ** 0.5 * x**2
             weight2 = 1 / (np.exp(x) - 1) if is_boson else 1 / (np.exp(x) + 1)
             return weight1 * weight2
         else:

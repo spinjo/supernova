@@ -4,7 +4,7 @@ from scipy.integrate import quad
 from utils.simulation_loader import load_simulation, get_RaffeltBound
 
 
-def get_trapping_luminosity_single(mChi, R, T):
+def get_trapping_luminosity_single(mChi, R, T, g=2):
     x_chi = mChi / T
     fac = 7 * np.pi**4 / 120  # mChi=0 solution
     if x_chi > 1e-2:
@@ -13,7 +13,7 @@ def get_trapping_luminosity_single(mChi, R, T):
             x_chi,
             np.inf,
         )[0]
-    lumi = 2 / np.pi * R**2 * T**4 * fac
+    lumi = g / np.pi * R**2 * T**4 * fac
     return lumi
 
 

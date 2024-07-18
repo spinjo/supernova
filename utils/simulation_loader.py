@@ -10,8 +10,8 @@ SIM_FILES = {
     "LS220": "hydro-LS220-T=1.0001464.txt",
 }
 RAFFELT_BOUND = {
-    "SFHo-18.6": 5.68e52,
-    "SFHo-18.80": 1.2e53,
+    "SFHo-18.80": 5.68e52,
+    "SFHo-20.0": 1.0e53,
 }  # in erg/s
 
 
