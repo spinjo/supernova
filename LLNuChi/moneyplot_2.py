@@ -20,6 +20,7 @@ X_LABEL_POS, Y_LABEL_POS = -0.1, -0.11
 
 sim1, sim2 = "SFHo-18.80", "SFHo-20.0"
 sim2_linestyle = (0, (1, 1))
+alpha = 0.7
 
 
 def get_SN_bounds(operator, tr_approach, lepton):
@@ -59,7 +60,7 @@ def money_plot(tr_approach, lepton):
                 mass[sim1],
                 Lambda_fs[sim1],
                 Lambda_tr[sim1],
-                alpha=0.5,
+                alpha=alpha,
                 color=ps.colors[0],
             )
             kwargs = {"linestyle": sim2_linestyle, "color": ps.colors[0], "alpha": 0.5}
