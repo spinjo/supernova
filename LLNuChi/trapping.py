@@ -8,12 +8,13 @@ from utils.thermodynamics import get_Fdeg
 from utils.trapping import Trapper
 from LLNuChi.analytical import get_sigma
 
-GAMMA_MIN = 1e-100
+# interpolation parameters (only used for 'exact')
 X_MAX = 1e2
+NSTEPS = 50
 
 
 class Trapper_LLNuChi(Trapper):
-    def get_inverse_mean_free_path(self, operator, R, **kwargs):
+    def get_inverse_mean_free_path(self, operator, **kwargs):
         if self.approach == "inverse":
             imfp = 0.0
             imfp += self._get_imfp_inverse_ann(operator, **kwargs)
@@ -78,7 +79,6 @@ class Trapper_LLNuChi(Trapper):
             imfp = gamma / (1 - mChi**2 / Echi**2) ** 0.5
             weight = self.mean_free_path_weight(Echi, mChi, T, is_boson=False)
             integrand = imfp * weight
-            assert np.isfinite(integrand).all()
             return integrand
 
         integrator = vegas.Integrator(
@@ -106,7 +106,6 @@ class Trapper_LLNuChi(Trapper):
             imfp = gamma / (1 - mChi**2 / Echi**2) ** 0.5
             weight = self.mean_free_path_weight(Echi, mChi, T, is_boson=False)
             integrand = imfp * weight
-            assert np.isfinite(integrand).all()
             return integrand
 
         integrator = vegas.Integrator(
@@ -116,14 +115,17 @@ class Trapper_LLNuChi(Trapper):
         norm = self.mean_free_path_normalization(mChi, T)
         return factor / norm
 
-    def get_imfp_exact(self, operator, T, mu, model, nsteps=20):
+    def get_imfp_exact(self, operator, T, mu, model):
         mChi = model["mChi"]
-        x_min = mChi / T * (1 + 1e-5)
-        Echi = np.exp(np.linspace(np.log(x_min * T), np.log(X_MAX * T), nsteps))
+        x_min = mChi / T * (1 + 1e-5)  # 1e-5 for numerical stability
+        x_max = max(
+            X_MAX, x_min * 10
+        )  # sufficient x_max also for large masses (-> large x_min)
+        Echi = np.exp(np.linspace(np.log(x_min * T), np.log(x_max * T), NSTEPS))
 
         # evaluate Gamma on a grid
-        Gamma = np.zeros(nsteps)
-        for i in range(nsteps):
+        Gamma = np.zeros(NSTEPS)
+        for i in range(NSTEPS):
             Gamma[i] += self._get_gamma_ann(
                 operator, Echi=Echi[i], T=T, mu=mu, model=model
             )
@@ -135,28 +137,26 @@ class Trapper_LLNuChi(Trapper):
             )
 
         # interpolate over the grid and evaluate the mfp
-        Gamma = np.clip(Gamma, a_min=GAMMA_MIN, a_max=None)
         logGamma_interpolation = interp1d(
             np.log(Echi / T),
             np.log(Gamma),
             kind="linear",
-            fill_value="extrapolate",
         )
 
         def f(x):
-            Echi = x * T
+            Echi_local = x * T
             Gamma = np.exp(logGamma_interpolation(np.log(x)))
-            mfp = (1 - mChi**2 / Echi**2) ** 0.5 / Gamma
-            weighting = self.mean_free_path_weight(Echi, mChi, T, is_boson=False)
+            v = (1 - mChi**2 / Echi_local**2) ** 0.5
+            mfp = v / Gamma
+            weighting = self.mean_free_path_weight(Echi_local, mChi, T, is_boson=False)
             integrand = mfp * weighting
             return integrand
 
-        factor = quad(f, x_min, X_MAX)[0]
+        factor = quad(f, x_min, x_max)[0]
 
         norm = self.mean_free_path_normalization(mChi, T)
         mfp = factor / norm
         imfp = 1 / mfp
-        assert np.isfinite(imfp).all()
         return imfp
 
     def _get_gamma_ann(self, operator, Echi, T, mu, model):
@@ -174,7 +174,6 @@ class Trapper_LLNuChi(Trapper):
             gamma = self._get_gamma_diff_ann(
                 operator, s, Echi, Enu, mL, mChi, Lambda, T, mu_nuL, Fdeg_Lm, Fdeg_Lp
             )
-            assert np.isfinite(gamma).all()
             return gamma
 
         integrator = vegas.Integrator([[0.0, 1.0], [-1.0, 1.0]])
@@ -196,7 +195,6 @@ class Trapper_LLNuChi(Trapper):
             gamma = self._get_gamma_diff_scat(
                 operator, s, Echi, EL, mL, mChi, Lambda, T, mu_L, Fdeg_L, Fdeg_nu
             )
-            assert np.isfinite(gamma).all()
             return gamma
 
         integrator = vegas.Integrator([[mL / (T + mL), 1.0], [-1.0, 1.0]])

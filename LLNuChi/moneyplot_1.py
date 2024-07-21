@@ -14,7 +14,7 @@ mChi_max = 1e3
 prec = 100
 mass = np.logspace(np.log10(mChi_min), np.log10(mChi_max), prec)
 
-y_min = {"V": 1e-62, "A": 1e-62, "S": 1e-62, "P": 1e-62, "T": 1e-68}
+y_min = {"V": 1e-63, "A": 1e-63, "S": 1e-63, "P": 1e-63, "T": 1e-68}
 y_max = {"V": 1e-45, "A": 1e-45, "S": 1e-45, "P": 1e-45, "T": 1e-45}
 
 FIGSIZE = (5, 4)
@@ -23,10 +23,17 @@ X_LABEL_POS, Y_LABEL_POS = -0.08, -0.14
 
 sim1, sim2 = "SFHo-18.80", "SFHo-20.0"
 sim2_linestyle = (0, (1, 1))
+alpha = 0.7
 
 
 def get_bounds(operator):
     bounds = {}
+    x, y = (
+        (mass, get_sigmav(constraints.bound_LEP[operator]))
+        if operator in ["A", "V"]
+        else (None, None)
+    )
+    bounds["LEP"] = {"x": x, "y": y}
     x, y, label = constraints.get_bound_overproduction(operator)
     bounds[label] = {"x": x, "y": y}
     x, y, label = constraints.get_bound_nugamma(mass, operator)
@@ -70,7 +77,7 @@ def get_SN_bounds(operator, tr_approach, lepton="e"):
     return bounds
 
 
-def money_plot(tr_approach):
+def money_plot(tr_approach="exact"):
     filename = f"results/moneyplot_1_{tr_approach}.pdf"
     with PdfPages(filename) as file:
         for operator in ["V", "A", "S", "P", "T"]:
@@ -95,7 +102,7 @@ def money_plot(tr_approach):
                 x,
                 y_low,
                 y_high,
-                alpha=0.5,
+                alpha=alpha,
                 color=ps.colors[0],
                 label="SN1987A",
             )
@@ -116,7 +123,7 @@ def money_plot(tr_approach):
                     x,
                     y,
                     y_max[operator] * np.ones_like(x),
-                    alpha=0.5,
+                    alpha=alpha,
                     color=color,
                     label=label,
                 )

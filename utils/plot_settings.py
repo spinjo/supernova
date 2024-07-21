@@ -1,7 +1,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 
-colors = ["#F56C0F", "#BC1D61", "#088C95", "#B4C948", "#75E8DA"]
+colors = ["#F56C0F", "#BC1D61", "#088C95", "#B4C948", "#75E8DA", "#C2AFF0"]
 
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["font.serif"] = "Charter"

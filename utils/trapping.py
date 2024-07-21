@@ -27,11 +27,16 @@ class Trapper:
             }
             imfp[i] = self.get_inverse_mean_free_path(
                 operator,
-                R=R[i_crit + i],
                 T=T[i_crit + i],
                 mu=mu_i,
                 model=model,
                 **kwargs,
+            )
+        test_mask = np.diff(imfp) > 0
+        if np.any(test_mask):
+            print(
+                f"Warning: imfp is increasing at position {np.where(test_mask)} "
+                f"by factor {np.diff(imfp)[test_mask]/imfp[:-1][test_mask]}. "
             )
         opacity = np.trapz(imfp, x=R[i_crit : i_crit + n])
         return opacity
@@ -68,5 +73,5 @@ class Trapper:
         )[0]
         return norm
 
-    def get_inverse_mean_free_path(self, operator, R, **kwargs):
+    def get_inverse_mean_free_path(self, operator, **kwargs):
         raise NotImplementedError

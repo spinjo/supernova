@@ -5,6 +5,9 @@ V_chi_to_nu3gamma = {"a": -11.37, "b": -20.94}
 A_chi_to_3nu = {"a": -3.09, "b": -43.71}
 V_chi_to_3nu = {"a": -3.19, "b": -43.14}
 
+# LEP bound by Claudio (on Lambda, in TeV)
+bound_LEP = {"V": 0.4, "A": 0.37}
+
 
 def get_bound_straight(mass, name):
     if name == "V_nu3gamma":

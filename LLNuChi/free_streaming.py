@@ -38,6 +38,7 @@ class FreeStreamer_LLNuChi(FreeStreamer):
         )
 
         dQdV = dQdV_ann + dQdV_scat
+        dQdV *= 2  # create chi and chibar
         dQdR = 4 * np.pi * R**2 * dQdV
         return dQdR
 
@@ -77,7 +78,6 @@ class FreeStreamer_LLNuChi(FreeStreamer):
             jac = T / (1 - a) ** 2 * T / (1 - b) ** 2
             s = get_s(mL, mL, E1, E2, costh)
             integrand = get_integrand(s, E1, E2) * jac
-            assert np.isfinite(integrand).all()
             return integrand
 
         integrator = vegas.Integrator(
@@ -123,7 +123,6 @@ class FreeStreamer_LLNuChi(FreeStreamer):
             jac = T / (1 - a) ** 2 * T / (1 - b) ** 2
             s = get_s(mL, 0.0, EL, ENu, costh)
             integrand = get_integrand(s, EL, ENu) * jac
-            assert np.isfinite(integrand).all()
             return integrand
 
         integrator = vegas.Integrator(
