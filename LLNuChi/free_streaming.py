@@ -38,7 +38,6 @@ class FreeStreamer_LLNuChi(FreeStreamer):
         )
 
         dQdV = dQdV_ann + dQdV_scat
-        dQdV *= 2  # create chi and chibar
         dQdR = 4 * np.pi * R**2 * dQdV
         return dQdR
 
