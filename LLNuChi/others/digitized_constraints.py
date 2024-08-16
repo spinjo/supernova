@@ -66,3 +66,14 @@ def get_bound_nudecay(mass, operator):
     else:
         x, y = None, None
     return x, y, r"$\chi\to 3\nu$"
+
+
+def get_bound_droretal(operator, velocity):
+    bounds = {}
+    if operator in ["V", "S"]:
+        for label in ["background", "darwin", "xenon1t"]:
+            data = np.loadtxt(f"others/droretal_{operator}_{label}.csv", delimiter=",")
+            x = data[:, 0]  # mass in keV
+            y = data[:, 1] * velocity  # m2/(4piLambda4) * v = sigma v in cm2
+            bounds[label] = {"x": x, "y": y}
+    return bounds
