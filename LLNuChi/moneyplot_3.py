@@ -19,7 +19,7 @@ mass = {
     for operator in ["V", "S"]
 }
 term = {
-    "V": r"\bar\chi \gamma^\mu P_R\nu \bar e\gamma_\mu e",
+    "V": r"\bar\chi \gamma^\mu P_L\nu \bar e\gamma_\mu e",
     "S": r"\bar\chi P_L\nu \bar ee",
 }
 
@@ -33,7 +33,9 @@ X_LABEL_POS, Y_LABEL_POS = -0.09, -0.14
 
 sim1, sim2 = "SFHo-18.80", "SFHo-20.0"
 sim2_linestyle = (0, (1, 1))
-alpha = 0.2
+alpha = 0.15
+background_color = "grey"
+lw_lines = 0.5
 
 VELOCITY = 1e-3
 
@@ -106,16 +108,16 @@ def money_plot(tr_approach="exact"):
                 x,
                 y,
                 y_max[operator] * np.ones_like(x),
-                color="k",
-                alpha=0.1,
+                color=background_color,
+                alpha=alpha,
             )
             ax.plot(
                 bounds_others["background"]["x"],
                 bounds_others["background"]["y"],
-                color="k",
-                alpha=0.2,
+                color=background_color,
+                alpha=1,
                 linestyle="-",
-                lw=2.0,
+                lw=lw_lines,
             )
             for label in ["darwin", "xenon1t"]:
                 ax.plot(
@@ -136,7 +138,7 @@ def money_plot(tr_approach="exact"):
                     alpha=alpha,
                     color=ps.colors[1],
                 )
-                ax.plot(x, y, color=ps.colors[1])
+                ax.plot(x, y, color=ps.colors[1], lw=lw_lines)
 
             # SN bound
             x, y_low, y_high = [
@@ -149,8 +151,8 @@ def money_plot(tr_approach="exact"):
                 alpha=alpha,
                 color=ps.colors[0],
             )
-            ax.plot(x, y_low, color=ps.colors[0])
-            ax.plot(x, y_high, color=ps.colors[0])
+            ax.plot(x, y_low, color=ps.colors[0], lw=lw_lines)
+            ax.plot(x, y_high, color=ps.colors[0], lw=lw_lines)
             x, y_low, y_high = [
                 bounds_SN[sim2][key] for key in ["x", "y_low", "y_high"]
             ]
@@ -203,18 +205,18 @@ def text_fields(ax, operator):
             5.1,
             3e-53,
             s="overabundance",
-            color="k",
-            alpha=0.3,
-            fontsize=0.9 * ps.FONTSIZE,
+            color=background_color,
+            alpha=1,
+            fontsize=0.85 * ps.FONTSIZE,
             rotation=9,
         )
         ax.text(
             330,
             5e-55,
             s=r"$\chi\to\nu\gamma\gamma\gamma$",
-            color="k",
-            alpha=0.3,
-            fontsize=0.9 * ps.FONTSIZE,
+            color=background_color,
+            alpha=1,
+            fontsize=0.85 * ps.FONTSIZE,
             rotation=-60,
         )
         ax.text(
@@ -222,9 +224,9 @@ def text_fields(ax, operator):
             2e-52,
             s=r"$\chi\to\nu\nu\nu$",
             horizontalalignment="center",
-            color="k",
-            alpha=0.3,
-            fontsize=0.9 * ps.FONTSIZE,
+            color=background_color,
+            alpha=1,
+            fontsize=0.85 * ps.FONTSIZE,
             rotation=0,
         )
         ax.text(
@@ -261,8 +263,8 @@ def text_fields(ax, operator):
             2.3e-53,
             s=r"overabundance",
             horizontalalignment="center",
-            color="k",
-            alpha=0.3,
+            color=background_color,
+            alpha=0.5,
             fontsize=0.9 * ps.FONTSIZE,
             rotation=5,
         )
@@ -271,8 +273,8 @@ def text_fields(ax, operator):
             1.5e-54,
             s=r"$\chi\to\nu\gamma\gamma$",
             horizontalalignment="center",
-            color="k",
-            alpha=0.3,
+            color=background_color,
+            alpha=0.5,
             fontsize=0.9 * ps.FONTSIZE,
             rotation=-22,
         )
