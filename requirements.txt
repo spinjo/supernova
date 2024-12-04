@@ -1,0 +1,10 @@
+# convenience
+black==22.3.0
+tqdm
+
+# standard science stack
+numpy==1.23.0
+scipy
+matplotlib
+
+vegas
